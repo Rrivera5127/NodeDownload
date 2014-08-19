@@ -24,13 +24,14 @@ function parseJson(str) {
     return jobj;
 }
 router.post("/", function (req, res, next) {
-    if (!req.body || !req.body.orderItems || !req.body.orderItems.length || !req.body.user || !req.body.orderName) {
+    if (!req.body || !req.body.orderItems || !req.body.orderItems.length || !req.body.user || !req.body.orderName || !req.body.recipientAddress) {
         next(new Error("Invalid or missing parameters"));
     }
     var zipProcess,
         zipArchive,
         outFolder, zipFileName,
         orderName = req.body.orderName,
+        toAddress = req.body.recipientAddress,
         orderItems = req.body.orderItems instanceof String ? parseJson(req.body.orderItems) : req.body.orderItems,
         user = req.body.user instanceof String ? parseJson(req.body.user) : req.body.user,
         timeStampFolder = new Date().getTime().toString();
@@ -39,15 +40,12 @@ router.post("/", function (req, res, next) {
     try {
         var outputURL = req.protocol + '://' + req.get(HOST) + "/" + config.downloadServiceUrlPart + "/" + timeStampFolder + "/" + zipFileName;
         zipProcess = cp.fork(__dirname + "/../services/ZipCreator");
-        zipProcess.on('close', function (code) {
-            console.log('child process exited with code ' + code);
-        });
-        console.dir(zipProcess);
         zipProcess.send({
             orderItems: orderItems,
             outFolder: outFolder,
             zipFileName: zipFileName,
-            downloadUrl: outputURL
+            downloadUrl: outputURL,
+            toAddress:  toAddress
         });
         return res.jsonp({success: true, message: "Your download is being generated"});
     }

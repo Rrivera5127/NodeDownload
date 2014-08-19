@@ -40,18 +40,19 @@ function writeZipItems(orderItems, zipArchive) {
     return zipArchive;
 }
 
-function generateDownloadZip(orderItems, outFolder, zipFileName, downloadUrl) {
+function generateDownloadZip(orderItems, outFolder, zipFileName, downloadUrl,toAddress) {
     var zipArchive, zipOutput, fileStats,
         createZipObj = createZip(outFolder, zipFileName), fullZipPath = path.join(outFolder, zipFileName);
     zipArchive = createZipObj.zip;
     zipOutput = createZipObj.output;
     zipOutput.on("close", function () {
         fileStats = fs.statSync(fullZipPath);
-        downloadAlert.downloadComplete(downloadUrl);
-        process.exit(0);
+        downloadAlert.downloadComplete(downloadUrl,toAddress).then(function(){
+            process.exit(0);
+        });
     });
     writeZipItems(orderItems, zipArchive).finalize();
 }
 process.on('message', function (args) {
-    generateDownloadZip(args.orderItems, args.outFolder, args.zipFileName, args.downloadUrl);
+    generateDownloadZip(args.orderItems, args.outFolder, args.zipFileName, args.downloadUrl,args.toAddress);
 });

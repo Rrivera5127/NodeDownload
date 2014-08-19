@@ -16,6 +16,8 @@
     "sanitize-filename": "~1.1.1",
     "mkdirp": "~0.5.0",
     "request": "~2.40.0",
-    "filesize": "~2.0.3"
+    "filesize": "~2.0.3",
+    "simplesmtp": "~0.3.32",
+    "promise": "~5.0.0"
   }
 }
