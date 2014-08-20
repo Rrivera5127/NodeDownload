@@ -2,6 +2,7 @@ var path = require('path');
 var config = {};
 config.zipDirectory = path.join(__dirname, "downloads");
 config.downloadServiceUrlPart = "downloadService";
+config.requireAgolUser = true;
 
 config.email = {
     alertFromAddress: "emailService@34098230398.com",

@@ -48,6 +48,8 @@ function mail(from, to, message) {
 module.exports.downloadComplete = function (downloadUrl,toAddress) {
     console.log("sending download alert to: " + toAddress);
     return  new Promise(function (resolve, reject) {
+        resolve();
+        /*
         var mailClient = mail(config.email.alertFromAddress, toAddress, ("Your download is ready: " + downloadUrl));
         mailClient.on("error", function () {
             console.log("Email sent");
@@ -57,6 +59,7 @@ module.exports.downloadComplete = function (downloadUrl,toAddress) {
             console.log("Email failed");
             reject();
         });
+        */
     });
 
 };

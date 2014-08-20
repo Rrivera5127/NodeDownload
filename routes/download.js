@@ -24,16 +24,17 @@ function parseJson(str) {
     return jobj;
 }
 router.post("/", function (req, res, next) {
-    if (!req.body || !req.body.orderItems || !req.body.orderItems.length || !req.body.user || !req.body.orderName || !req.body.recipientAddress) {
-        next(new Error("Invalid or missing parameters"));
+    if (!req.body || !req.body.orderItems || !req.body.orderItems.length || (!req.body.user && config.requireAgolUser) || !req.body.orderName || !req.body.recipientEmail) {
+        return res.jsonp({success: false, message: "Missing or invalid parameters"});
     }
+    console.log(typeof req.body.orderItems);
     var zipProcess,
         zipArchive,
         outFolder, zipFileName,
         orderName = req.body.orderName,
-        toAddress = req.body.recipientAddress,
-        orderItems = req.body.orderItems instanceof String ? parseJson(req.body.orderItems) : req.body.orderItems,
-        user = req.body.user instanceof String ? parseJson(req.body.user) : req.body.user,
+        toAddress = req.body.recipientEmail,
+        orderItems = (typeof req.body.orderItems) === 'string' ? parseJson(req.body.orderItems) : req.body.orderItems,
+      //  user = (typeof req.body.user) ===  'string' ? parseJson(req.body.user) : req.body.user,
         timeStampFolder = new Date().getTime().toString();
     outFolder = path.join(config.zipDirectory, timeStampFolder);
     zipFileName = sanitizeFilename(orderName) + ZIP_EXTENSION;
@@ -50,7 +51,7 @@ router.post("/", function (req, res, next) {
         return res.jsonp({success: true, message: "Your download is being generated"});
     }
     catch (err) {
-        next(err || new Error("Could not write zip file"));
+        return res.jsonp({success: false, message: "Error generating zip file"});
     }
 });
 module.exports = router;
