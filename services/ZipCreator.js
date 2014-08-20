@@ -35,6 +35,7 @@ function writeZipItems(orderItems, zipArchive) {
         if (!currOrderItemName || !currOrderItemUrl) {
             continue;
         }
+        //todo check for status codes to make sure of 200
         zipArchive.append(request(currOrderItemUrl), {name: path.join(currOrderItemServiceName, currOrderItemName)});
     }
     return zipArchive;
