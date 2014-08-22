@@ -25,21 +25,27 @@ function writeZipItems(orderItems, zipArchive) {
         return zipArchive || {finalize: function () {
         }};
     }
-    var i, currOrderItemName, currOrderItemUrl, currOrderItemServiceName, zipName;
+    var i, currentOrderItem, currOrderItemName, currOrderItemUrl, currOrderItemServiceName, zipName, currentItemObjectId;
     console.dir(orderItems);
     console.log("order item count: " + orderItems.length);
     for (i = 0; i < orderItems.length; i++) {
         if (!orderItems[i]) {
             continue
         }
-        currOrderItemName = orderItems[i].label;
-        currOrderItemUrl = orderItems[i].url;
-        currOrderItemServiceName = orderItems[i].serviceName || "";
+        currentOrderItem = orderItems[i];
+        if (!currentOrderItem) {
+            continue;
+        }
+        currOrderItemName = currentOrderItem.label;
+        currentItemObjectId = currentOrderItem.objectId;
+        currOrderItemUrl = currentOrderItem.url;
+        currOrderItemServiceName = currentOrderItem.serviceName || "";
         if (!currOrderItemName || !currOrderItemUrl) {
             continue;
         }
         //todo check for status codes to make sure of 200
-        zipName = path.join(currOrderItemServiceName, currOrderItemName);
+        zipName = path.join(currOrderItemServiceName, currentItemObjectId);
+        zipName = path.join(zipName, currOrderItemName);
         console.log("adding zip item from url: " + currOrderItemUrl);
         console.log("zip name: " + zipName);
         //todo: there is no object id to create subfolder for service name. might run into file name collisions since we are just dropping each download into the serivce names folder?
