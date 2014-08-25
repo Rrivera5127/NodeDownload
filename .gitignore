@@ -30,3 +30,7 @@ node_modules
 
 # Users Environment Variables
 .lock-wscript
+
+#config
+aws.credentials.dev.json
+config.dev.js

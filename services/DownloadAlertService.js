@@ -1,8 +1,7 @@
+"use strict";
 var simplesmtp = require("simplesmtp");
 var Promise = require("promise");
 var config = require("../config");
-
-
 /**
  * Send a raw email
  *
@@ -36,27 +35,24 @@ function mail(from, to, message) {
     });
 
     client.on('error', function (err) {
-        console.log(err);
     });
 
     client.on('end', function () {
-        console.log('DONE')
     });
     return client;
 }
 
 module.exports.downloadComplete = function (downloadUrl,toAddress) {
-    console.log("sending download alert to: " + toAddress);
     return  new Promise(function (resolve, reject) {
         resolve();
         /*
         var mailClient = mail(config.email.alertFromAddress, toAddress, ("Your download is ready: " + downloadUrl));
         mailClient.on("error", function () {
-            console.log("Email sent");
+            // console.log("Email sent");
             resolve();
         });
         mailClient.on("end", function () {
-            console.log("Email failed");
+            // console.log("Email failed");
             reject();
         });
         */

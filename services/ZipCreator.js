@@ -21,12 +21,11 @@ function createZip(outputFolder, zipName) {
 }
 function writeZipItems(orderItems, zipArchive) {
     if (!orderItems) {
-        console.log("not order items, returning");
+        console.log("no order items, returning");
         return zipArchive || {finalize: function () {
         }};
     }
     var i, currentOrderItem, currOrderItemName, currOrderItemUrl, currOrderItemServiceName, zipName, currentItemObjectId;
-    console.dir(orderItems);
     console.log("order item count: " + orderItems.length);
     for (i = 0; i < orderItems.length; i++) {
         if (!orderItems[i]) {
@@ -44,11 +43,14 @@ function writeZipItems(orderItems, zipArchive) {
             continue;
         }
         //todo check for status codes to make sure of 200
-        zipName = path.join(currOrderItemServiceName, currentItemObjectId);
+        if (currentItemObjectId || currentItemObjectId === 0) {
+            zipName = path.join(currOrderItemServiceName, currentItemObjectId);
+        }
+        else {
+            zipName = currOrderItemServiceName;
+        }
         zipName = path.join(zipName, currOrderItemName);
         console.log("adding zip item from url: " + currOrderItemUrl);
-        console.log("zip name: " + zipName);
-        //todo: there is no object id to create subfolder for service name. might run into file name collisions since we are just dropping each download into the serivce names folder?
         zipArchive.append(request(currOrderItemUrl), {name: zipName});
     }
     return zipArchive;
@@ -64,9 +66,9 @@ function generateDownloadZip(orderItems, outFolder, zipFileName, downloadUrl, to
         fileStats = fs.statSync(fullZipPath);
         downloadAlert.downloadComplete(downloadUrl, toAddress).then(function () {
             process.exit(0);
+
         });
     });
-    console.log("write zip items");
     writeZipItems(orderItems, zipArchive).finalize();
 }
 process.on('message', function (args) {

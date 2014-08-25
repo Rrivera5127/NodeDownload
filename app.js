@@ -1,21 +1,18 @@
 var express = require('express');
 var path = require('path');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var exphbs = require("express-handlebars");
 var download = require('./routes/download');
-var config = require("./config");
+var config = require("./config.dev");//switch to config
+var logger = config.logger;
+var DownloadQueueService = require("./services/DownloadQueueService");
+
 var app = express();
-app.use(logger('dev'));
 
 app.engine("handlebars", exphbs());
 app.set("view engine", "handlebars");
-
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-app.use(cookieParser());
 
 app.use('/' + config.downloadServiceUrlPart, express.static(__dirname + '/downloads'));
 
@@ -32,9 +29,9 @@ app.use(function (req, res, next) {
 // production error handler
 // no stacktraces leaked to user
 app.use(function (err, req, res, next) {
+    logger.error(err);
     res.status(err.status || 500);
     return res.json({message: err.message});
 });
-
 
 module.exports = app;
