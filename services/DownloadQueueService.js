@@ -4,9 +4,11 @@ var sanitizeFilename = require("sanitize-filename");
 var appConf = require('../config');
 var Promise = require("promise");
 var path = require("path");
+var cp = require('child_process');
+
+
 AWS.config.loadFromPath(appConf.awsCredentialsPath);
 var sqs = new AWS.SQS();
-var cp = require('child_process');
 var logger = appConf.logger;
 
 var ZIP_EXTENSION = ".zip";

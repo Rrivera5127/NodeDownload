@@ -58,12 +58,11 @@ function writeZipItems(orderItems, zipArchive) {
 
 function generateDownloadZip(orderItems, outFolder, zipFileName, downloadUrl, toAddress) {
     console.log("generateDownloadZip");
-    var zipArchive, zipOutput, fileStats,
+    var zipArchive, zipOutput,
         createZipObj = createZip(outFolder, zipFileName), fullZipPath = path.join(outFolder, zipFileName);
     zipArchive = createZipObj.zip;
     zipOutput = createZipObj.output;
     zipOutput.on("close", function () {
-        fileStats = fs.statSync(fullZipPath);
         downloadAlert.downloadComplete(downloadUrl, toAddress).then(function () {
             process.exit(0);
 

@@ -45,6 +45,7 @@ function mail(from, to, message) {
 module.exports.downloadComplete = function (downloadUrl,toAddress) {
     return  new Promise(function (resolve, reject) {
         resolve();
+          //NOT IMPLEMENTED YET
         /*
         var mailClient = mail(config.email.alertFromAddress, toAddress, ("Your download is ready: " + downloadUrl));
         mailClient.on("error", function () {
