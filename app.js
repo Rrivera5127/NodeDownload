@@ -5,7 +5,6 @@ var exphbs = require("express-handlebars");
 var download = require('./routes/download');
 var config = require("./config.dev");//switch to config
 var logger = config.logger;
-var DownloadQueueService = require("./services/DownloadQueueService");
 
 var app = express();
 

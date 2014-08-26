@@ -1,30 +1,23 @@
 "use strict";
 var path = require('path');
 var winston = require("winston");
+var AWS = require('aws-sdk');
 var config = {};
-config.maxParallelDownloads = 2;
-config.awsCredentialsPath = './aws.credentials.json';
-config.sqsQueueUrl = '*YOUR_QUEUE_URL*';
+config.awsCredentialsPath = './aws.credentials.json';  //change this to aws.credentials.json and populate your secret and access keys
+config.sqsUrl = '';
+config.s3 = {
+    bucketName: "",
+    uploadACL: 'public-read',
+    bucketUrlPrefix: ""
+
+};
 config.zipDirectory = path.join(__dirname, "downloads");
-config.downloadServiceUrlPart = "downloadService";
-config.requireAgolUser = false;
-config.downloadHost = {
-    protocol: "https",
-    hostname: "*YOUR_HOSTNAME*",
-    port: "" //leave empty for default protocol port
-};
-config.email = {
-    alertFromAddress: "NOT_IMPLEMENTED",
-    smtp: {
-        server: "smtp.gmail.com",
-        port: 465
-    }
-};
+config.requireAgolUser = true;
 config.logger = new (winston.Logger)({
     transports: [
-        new (winston.transports.Console)({ level: 'debug' })//,
-     //   new (winston.transports.File)({ filename: 'c:/downloaderLog.log', level: 'debug' })
+        new (winston.transports.Console)({ level: 'debug'  }),
+        new (winston.transports.File)({ filename: 'c:/temp/downloaderLog.log', level: 'debug' })
     ]
 });
+AWS.config.loadFromPath(config.awsCredentialsPath);
 module.exports = config;
-

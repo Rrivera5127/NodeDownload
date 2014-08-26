@@ -1,9 +1,9 @@
 "use strict";
 var express = require('express');
 var AWS = require('aws-sdk');
-var appConf = require('../config');
-var logger = require("../config").logger;
-AWS.config.loadFromPath(appConf.awsCredentialsPath);
+var config = require('../config.dev');
+var logger = config.logger;
+AWS.config.loadFromPath(config.awsCredentialsPath);
 var sqs = new AWS.SQS();
 var router = express.Router();
 
@@ -11,16 +11,25 @@ router.post("/", function (req, res, next) {
     if (!req.body || !req.body.orderItems || !req.body.orderItems.length || (!req.body.user && config.requireAgolUser) || !req.body.orderName || !req.body.recipientEmail) {
         return res.jsonp({success: false, message: "Missing or invalid parameters"});
     }
-    logger.debug(JSON.stringify(req.body));
+    var parametersAsObj = {
+        orderItems: req.body.orderItems,
+        recipientEmail: req.body.recipientEmail,
+        orderName: req.body.orderName
+    };
+    if (req.body.user) {
+        parametersAsObj.user = req.body.user;
+    }
     var params = {
-        MessageBody: (typeof req.body.orderItems) === 'string' ? req.body : JSON.stringify(req.body),
-        QueueUrl: appConf.sqsQueueUrl,
+        MessageBody: JSON.stringify(parametersAsObj),
+        QueueUrl: config.sqsQueueUrl,
         DelaySeconds: 0
     };
+
     // console.log("adding download request to queue");
     sqs.sendMessage(params, function (err, data) {
         if (err) {
             logger.error("failed to add download to queue");
+            logger.error(err);
             return res.jsonp({success: false, message: "Could not process download request"});
         }
         else {

@@ -2,10 +2,10 @@ var fs = require("fs");
 var archiver = require("archiver");
 var request = require("request");
 var mkdirp = require("mkdirp");
-var config = require("../config");
+var config = require('../config.dev');
 var path = require("path");
 var console = require("console");
-var downloadAlert = require("./DownloadAlertService");
+var logger = config.logger;
 
 function createZip(outputFolder, zipName) {
     var outputPath, output, zipArchive = archiver("zip");
@@ -21,12 +21,12 @@ function createZip(outputFolder, zipName) {
 }
 function writeZipItems(orderItems, zipArchive) {
     if (!orderItems) {
-        console.log("no order items, returning");
+        logger.warn("no order items, returning");
         return zipArchive || {finalize: function () {
         }};
     }
-    var i, currentOrderItem, currOrderItemName, currOrderItemUrl, currOrderItemServiceName, zipName, currentItemObjectId;
-    console.log("order item count: " + orderItems.length);
+    var i, currentOrderItem, currOrderItemName, currOrderItemUrl, currOrderItemServiceName, zipEntryName, currentItemObjectId;
+    logger.debug("order item count: " + orderItems.length);
     for (i = 0; i < orderItems.length; i++) {
         if (!orderItems[i]) {
             continue
@@ -44,32 +44,28 @@ function writeZipItems(orderItems, zipArchive) {
         }
         //todo check for status codes to make sure of 200
         if (currentItemObjectId || currentItemObjectId === 0) {
-            zipName = path.join(currOrderItemServiceName, currentItemObjectId);
+            zipEntryName = path.join(currOrderItemServiceName, currentItemObjectId);
         }
         else {
-            zipName = currOrderItemServiceName;
+            zipEntryName = currOrderItemServiceName;
         }
-        zipName = path.join(zipName, currOrderItemName);
-        console.log("adding zip item from url: " + currOrderItemUrl);
-        zipArchive.append(request(currOrderItemUrl), {name: zipName});
+        zipEntryName = path.join(zipEntryName, currOrderItemName);
+        logger.info("adding zip item from url: " + currOrderItemUrl);
+        zipArchive.append(request(currOrderItemUrl), {name: zipEntryName});
     }
     return zipArchive;
 }
 
-function generateDownloadZip(orderItems, outFolder, zipFileName, downloadUrl, toAddress) {
-    console.log("generateDownloadZip");
-    var zipArchive, zipOutput,
-        createZipObj = createZip(outFolder, zipFileName), fullZipPath = path.join(outFolder, zipFileName);
-    zipArchive = createZipObj.zip;
-    zipOutput = createZipObj.output;
-    zipOutput.on("close", function () {
-        downloadAlert.downloadComplete(downloadUrl, toAddress).then(function () {
-            process.exit(0);
-
-        });
+function generateDownloadZip(zipJob) {
+    logger.debug("generateDownloadZip");
+    var createZipObj = createZip(zipJob);
+    createZipObj.output.on("close", function () {
+        logger.debug("zip archive closed");
+        process.exit(0);
     });
-    writeZipItems(orderItems, zipArchive).finalize();
+    logger.debug("finalize zip");
+    writeZipItems(zipJob.orderItems, createZipObj.zip).finalize();
 }
 process.on('message', function (args) {
-    generateDownloadZip(args.orderItems, args.outFolder, args.zipFileName, args.downloadUrl, args.toAddress);
+    generateDownloadZip(args.outFolder, args.zipFileName);
 });
