@@ -21,7 +21,7 @@ router.post("/", function (req, res, next) {
     }
     var params = {
         MessageBody: JSON.stringify(parametersAsObj),
-        QueueUrl: config.sqsQueueUrl,
+        QueueUrl: config.sqsUrl,
         DelaySeconds: 0
     };
 

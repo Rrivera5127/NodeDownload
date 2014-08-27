@@ -2,39 +2,37 @@
 var Promise = require("promise");
 var AWS = require('aws-sdk');
 var config = require('../config.dev');
-
 var ses = new AWS.SES();
 var logger = config.logger;
 module.exports.alertUser = function (downloadUrl, toAddress) {
-    return  new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
         var params = {
             Destination: {
                 ToAddresses: [
-                    "rrivera@esri.com"
+                    toAddress
                 ]
             },
             Message: {
                 Body: {
                     Html: {
-                        Data: '<a href=\'' + downloadUrl + '\'>' + downloadUrl + '</a>', /* required */
-                        Charset: 'utf-8'
+                        Data: config.email.contentTemplate ? config.email.contentTemplate.replace(/\$DOWNLOAD_URL\$/g, downloadUrl) : '<a href=\'' + downloadUrl + '\'>' + downloadUrl + '</a>',
+                        Charset: config.email.encoding || "utf-8"
                     }
-
                 },
                 Subject: { /* required */
-                    Data: 'Your Download Is Ready', /* required */
-                    Charset: 'utf-8'
+                    Data: config.email.subject, /* required */
+                    Charset: config.email.encoding || "utf-8"
                 }
             },
-            Source: 'rrivera@esri.com', /* required */
+            Source: config.email.fromAddress,
             ReplyToAddresses: [
-                'rrivera@esri.com',
+                config.email.replyToAddress
             ]
         };
         ses.sendEmail(params, function (err, data) {
             if (err) {
                 logger.error(err);
-                reject(new Error("Could not send email"));
+                reject(err);
             }
             else {
                 logger.info("Sent email to %s with link %s", toAddress, downloadUrl);

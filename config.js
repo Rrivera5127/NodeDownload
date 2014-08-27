@@ -9,6 +9,13 @@ config.s3 = {
     bucketName: "",
     uploadACL: 'public-read',
     bucketUrlPrefix: ""
+};
+config.email = {
+    fromAddress: "@esri.com",
+    replyToAddress: "@esri.com",
+    subject: "Your Imagery Download Is Ready",
+    encoding: "utf-8",
+    contentTemplate: 'You can access your file here: <a href=\'$DOWNLOAD_URL$\'>$DOWNLOAD_URL$</a>'
 
 };
 config.zipDirectory = path.join(__dirname, "downloads");

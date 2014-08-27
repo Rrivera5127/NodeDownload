@@ -1,21 +1,14 @@
 var fs = require("fs");
 var archiver = require("archiver");
 var request = require("request");
-var mkdirp = require("mkdirp");
 var config = require('../config.dev');
 var path = require("path");
 var console = require("console");
 var logger = config.logger;
-
-function createZip(outputFolder, zipName) {
-    var outputPath, output, zipArchive = archiver("zip");
-    mkdirp(outputFolder, function (err) {
-        if (err) {
-            throw err;
-        }
-    });
-    outputPath = path.join(outputFolder, zipName);
-    output = fs.createWriteStream(outputPath);
+var Promise = require("promise");
+function createZip(zipJob) {
+    var output, zipArchive = archiver("zip");
+    output = fs.createWriteStream(zipJob.fullFilePath);
     zipArchive.pipe(output);
     return {zip: zipArchive, output: output};
 }
@@ -56,16 +49,14 @@ function writeZipItems(orderItems, zipArchive) {
     return zipArchive;
 }
 
-function generateDownloadZip(zipJob) {
+module.exports.generateZip = function (zipJob) {
     logger.debug("generateDownloadZip");
-    var createZipObj = createZip(zipJob);
-    createZipObj.output.on("close", function () {
-        logger.debug("zip archive closed");
-        process.exit(0);
+    return new Promise(function (resolve, reject) {
+        var createZipObj = createZip(zipJob);
+        createZipObj.output.on("close", function () {
+            resolve(zipJob);
+        });
+        logger.debug("finalize zip");
+        writeZipItems(zipJob.orderItems, createZipObj.zip).finalize();
     });
-    logger.debug("finalize zip");
-    writeZipItems(zipJob.orderItems, createZipObj.zip).finalize();
-}
-process.on('message', function (args) {
-    generateDownloadZip(args.outFolder, args.zipFileName);
-});
+};
