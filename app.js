@@ -15,8 +15,6 @@ app.set("view engine", "handlebars");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 
-app.use('/' + config.downloadServiceUrlPart, express.static(__dirname + '/downloads'));
-
 app.use('/download', download);
 
 /// catch 404 and forwarding to error handler
