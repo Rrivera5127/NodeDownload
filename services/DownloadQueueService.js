@@ -52,7 +52,7 @@ function createZipJob(messageJson, receiptHandle, messageId) {
     return zipJob;
 }
 function messageProcessingComplete(zipJob) {
-    if (zipJob) {
+    if (zipJob && runningZipJobs[zipJob.messageId]) {
         delete runningZipJobs[zipJob.messageId];
     }
     currentDownloads--;
@@ -66,18 +66,26 @@ function processZipJob(zipJob) {
     zipProcess.on("exit", function (err) {
         if (err) {
             messageProcessingComplete();
+            //todo: should probably send a SQS message to a error listener service that can check into why the zip creation failed
         }
         logger.info("parent process alerted");
-        // todo: check to make sure all files were zipped
         if (fs.existsSync(zipJob.fullFilePath)) {
             logger.info("uploading zip job %s to S3", zipJob.messageId);
             S3UploadService.uploadFile(zipJob.fullFilePath, zipJob.s3UploadZipKey).then(function (data) {
                     // resolved
                     if (data) {
                         logger.info("alerting user that  zip job %s is ready for download", zipJob.messageId);
-                        DownloadAlertService.alertUser(zipJob.outputURL, zipJob.recipientEmail);
+                        DownloadAlertService.alertUser(zipJob.outputURL, zipJob.recipientEmail).then(function () {
+                                //resolved
+                                logger.info("email successfully send to %s", zipJob.recipientEmail);
+                                deleteMessage(zipJob.messageHandle);
+                            },
+                            function () {
+                                //rejected
+                                //todo: need to send an alert that the zip was created successfully but the email failed to send to the user
+                                logger.error("There was an error sending download link to email address: %s",zipJob.recipientEmail);
+                            });
                         //todo need to check for email success
-                        deleteMessage(zipJob.messageHandle);
                     }
                     messageProcessingComplete(zipJob);
                 },

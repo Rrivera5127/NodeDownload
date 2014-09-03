@@ -38,8 +38,9 @@ module.exports.alertUser = function (downloadUrl, toAddress) {
             else {
                 logger.info("Sent email to %s with link %s", toAddress, downloadUrl);
                 logger.debug(data);
+                resolve();
+
             }
-            resolve();
         });
     });
 
