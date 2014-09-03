@@ -3,10 +3,12 @@ var path = require('path');
 var winston = require("winston");
 var AWS = require('aws-sdk');
 var config = {};
+config.maxDownloadProcesses = 2;
 config.awsCredentialsPath = './aws.credentials.json';  //change this to aws.credentials.json and populate your secret and access keys
 config.sqsUrl = '';
 config.s3 = {
     bucketName: "",
+    downloadBucketPath: "/downloads",
     uploadACL: 'public-read',
     bucketUrlPrefix: ""
 };
@@ -27,4 +29,5 @@ config.logger = new (winston.Logger)({
     ]
 });
 AWS.config.loadFromPath(config.awsCredentialsPath);
+config.logger.info("loaded AWS credentials");
 module.exports = config;

@@ -31,6 +31,7 @@ module.exports.alertUser = function (downloadUrl, toAddress) {
         };
         ses.sendEmail(params, function (err, data) {
             if (err) {
+                logger.error("Error sending email");
                 logger.error(err);
                 reject(err);
             }

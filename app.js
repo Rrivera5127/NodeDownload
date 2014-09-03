@@ -6,7 +6,9 @@ var download = require('./routes/download');
 var config = require("./config.dev");//switch to config
 var logger = config.logger;
 
-var DownloadQueueService = require("./services/DownloadQueueService");
+var downloadQueueService = require("./services/DownloadQueueService");
+//kick off the message listener the first time
+downloadQueueService.startListener();
 
 var app = express();
 
