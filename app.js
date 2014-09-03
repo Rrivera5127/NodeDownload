@@ -3,7 +3,7 @@ var path = require('path');
 var bodyParser = require('body-parser');
 var exphbs = require("express-handlebars");
 var download = require('./routes/download');
-var config = require("./config.dev");//switch to config
+var config = require("./config");//switch to config
 var logger = config.logger;
 
 var downloadQueueService = require("./services/DownloadQueueService");
@@ -30,7 +30,7 @@ app.use(function (req, res, next) {
 // production error handler
 // no stacktraces leaked to user
 app.use(function (err, req, res, next) {
-    logger.error(err);
+    logger.error(err,err.stack);
     res.status(err.status || 500);
     return res.json({message: err.message});
 });

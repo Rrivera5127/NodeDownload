@@ -1,6 +1,6 @@
 "use strict";
 var AWS = require('aws-sdk');
-var config = require('../config.dev');
+var config = require('../config');
 var Promise = require("promise");
 var path = require("path");
 var fs = require('fs');

@@ -1,8 +1,9 @@
 var fs = require("fs");
 var archiver = require("archiver");
 var request = require("request");
-var config = require('../config.dev');
+var config = require('../config');
 var path = require("path");
+var util = require("util");
 var console = require("console");
 var async = require("async");
 var temp = require("temp").track();
@@ -45,10 +46,7 @@ function writeZipItems(orderItems, zipArchive) {
                 callback(null, {error: true, message: "Request Error"});
             });
             stream.on("error", function (err) {
-                logger.error("Error writing stream to: %s for URL: %s",info.path, currOrderItemUrl);
-                if (err) {
-                    logger.error(err);
-                }
+                logger.error(err,util.format("Error writing stream to: %s for URL: %s",info.path, currOrderItemUrl));
                 callback(null, {error: true, message: "Error writing to stream"});
             });
             stream.on("close", function () {
@@ -82,10 +80,7 @@ process.on('message', function (zipJob) {
             logger.info("zip complete, alerting parent process");
             process.exit(0);
         }, function (err) {
-            logger.info("exiting process on reject");
-            if(err){
-                logger.error(err);
-            }
+            logger.info("exiting process on reject",err);
             process.exit(1);
         });
     }
@@ -105,8 +100,7 @@ function generateZip(zipJob) {
             writeZipItems(zipJob.orderItems, createZipObj.zip);
         }
         catch (err) {
-            logger.error("error writing zip");
-            logger.error(err);
+            logger.error(err,"error writing zip");
             reject(err);
         }
     });

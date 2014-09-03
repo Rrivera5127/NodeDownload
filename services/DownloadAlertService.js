@@ -1,7 +1,8 @@
 "use strict";
 var Promise = require("promise");
 var AWS = require('aws-sdk');
-var config = require('../config.dev');
+var config = require('../config');
+var util = require("util");
 var ses = new AWS.SES();
 var logger = config.logger;
 module.exports.alertUser = function (downloadUrl, toAddress) {
@@ -31,13 +32,12 @@ module.exports.alertUser = function (downloadUrl, toAddress) {
         };
         ses.sendEmail(params, function (err, data) {
             if (err) {
-                logger.error("Error sending email");
-                logger.error(err);
+                logger.error(err,"Error sending email");
                 reject(err);
             }
             else {
-                logger.info("Sent email to %s with link %s", toAddress, downloadUrl);
-                logger.debug(data);
+                logger.info(util.format("Sent email to %s with link %s", toAddress, downloadUrl));
+                logger.debug(data,"Email data");
                 resolve();
 
             }
